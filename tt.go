@@ -14,8 +14,43 @@ type Event struct {
 	StartTime   time.Time `yaml: "startTime"`
 	EndTime     time.Time `yaml: "endTime"`
 }
+
 type TrackingData struct {
 	Events []Event
+}
+
+func (td *TrackingData) LastEvent() *Event {
+	return &td.Events[len(td.Events)-1]
+}
+
+func (td *TrackingData) LastEventIsOpen() bool {
+	return td.LastEvent().EndTime.IsZero()
+}
+
+func (td *TrackingData) CloseLastEvent() {
+	td.LastEvent().EndTime = time.Now()
+}
+
+func (td *TrackingData) ToggleLast() {
+	if td.LastEventIsOpen() {
+		td.CloseLastEvent()
+	} else {
+		td.AddEvent(Data{Description: td.LastEvent().Description})
+	}
+}
+
+func (td *TrackingData) AddEvent(data Data) {
+	events := append(td.Events, startEvent(data.Description))
+	td.Events = events
+}
+
+type Data struct {
+	Description string
+}
+
+type ActionData struct {
+	Action string
+	Data
 }
 
 func read(location string) TrackingData {
@@ -38,19 +73,15 @@ func persist(data *TrackingData, location string) {
 	f.Close()
 }
 
-func determineConfig() map[string]string {
-	if len(flag.Args()) == 0 {
-		return map[string]string{"action": "toggle-last"}
-	}
-	return map[string]string{}
-}
-
-func toggleLast(data *TrackingData) {
-	lastEvent := &data.Events[len(data.Events)-1]
-	if lastEvent.EndTime.IsZero() {
-		lastEvent.EndTime = time.Now()
-	} else {
-		data.Events = append(data.Events, startEvent(lastEvent.Description))
+func determineConfig() ActionData {
+	switch {
+	case len(flag.Args()) == 0:
+		return ActionData{Action: "toggle-last"}
+	case len(flag.Args()) == 1:
+		data := Data{Description: flag.Arg(0)}
+		return ActionData{Action: "create-new", Data: data}
+	default:
+		return ActionData{}
 	}
 }
 
@@ -65,15 +96,13 @@ func main() {
 
 	trackingData := read("./tracking.yml")
 
-	switch config["action"] {
+	switch config.Action {
 	case "toggle-last":
-		toggleLast(&trackingData)
+		trackingData.ToggleLast()
+	case "create-new":
+		trackingData.CloseLastEvent()
+		trackingData.AddEvent(config.Data)
 	}
-	// description := os.Args[1]
-	//
-	// newEvent :=
-	//
-	// trackingData.Events = append(trackingData.Events, newEvent)
 
 	persist(&trackingData, "./tracking.yml")
 }
