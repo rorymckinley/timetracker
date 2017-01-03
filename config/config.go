@@ -24,7 +24,8 @@ func (c Config) Config() ActionData {
 	case len(c.Args) == 0:
 		config = ActionData{Action: "toggle-last"}
 	case len(c.Args) == 1:
-		data := data.Data{Description: c.Args[0], Category: c.Category, StartTime: createStart(c.StartTime)}
+		data := data.Data{Description: c.Args[0], Category: c.Category, StartTime: createStart(c.StartTime),
+			EndTime: createEnd(c.EndTime), Subcategories: strings.Split(c.Subcategories, ",")}
 		config = ActionData{Action: "create-new", Data: data}
 	}
 	return config
@@ -42,6 +43,18 @@ func createStart(hoursmins string) time.Time {
 	return startTime
 }
 
+func createEnd(hoursmins string) time.Time {
+	var endTime time.Time
+
+	if hoursmins != "" {
+		endTime = convert(hoursmins)
+	} else {
+		endTime = time.Time{}
+	}
+
+	return endTime
+}
+
 func convert(hoursmins string) time.Time {
 	timeparts := strings.Split(hoursmins, ":")
 	now := time.Now()
@@ -49,15 +62,4 @@ func convert(hoursmins string) time.Time {
 	hours, _ := strconv.Atoi(timeparts[0])
 	minutes, _ := strconv.Atoi(timeparts[1])
 	return time.Date(now.Year(), now.Month(), now.Day(), hours, minutes, 0, 0, location)
-	// if time != "" {
-	// 	timeparts = strings.Split(time, ":")
-	// 	now := Time.Now()
-	// 	location, _ = time.LoadLocation("Local")
-	// 	return time.Date(now.Year(), now.Date(), now.Day(), strconv.Atoi(timeparts[0]), strconv.Atoi(timeparts[1]),
-	// 		0, 0, location)
-	//
-	// } else {
-	// 	return time.Time{}
-	// }
-
 }

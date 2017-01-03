@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"testing"
 	"time"
 )
@@ -57,4 +58,53 @@ func TestSetsStartTimeToNowIfNotProvided(t *testing.T) {
 	if conf.StartTime.Format(format) != expected {
 		t.Error("Does not default start time")
 	}
+}
+
+func TestCorrectlyHandlesEndTime(t *testing.T) {
+	c := Config{Args: []string{"foobarbaz"}, Category: "cat", EndTime: "16:02"}
+	conf := c.Config()
+	location, _ := time.LoadLocation("Local")
+	expected := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 16, 2, 0, 0, location)
+
+	if conf.EndTime != expected {
+		t.Error("Does not set end time")
+	}
+}
+
+func TestCorrectlySetsEndTimeToZeroIfNotProvided(t *testing.T) {
+	c := Config{Args: []string{"foobarbaz"}, Category: "cat"}
+	conf := c.Config()
+	expected := time.Time{}
+
+	if conf.EndTime != expected {
+		t.Error("Does not default end time")
+	}
+}
+
+func TestCorrectlySetsSubcategories(t *testing.T) {
+	c := Config{Args: []string{"foobarbaz"}, Category: "cat", Subcategories: "some,stuff,goes,here"}
+	conf := c.Config()
+
+	if !subCategoriesAreEqual([]string{"some", "stuff", "goes", "here"}, conf.Subcategories) {
+		t.Error("Does not process subcategories correctly")
+	}
+}
+
+func subCategoriesAreEqual(expected []string, actual []string) bool {
+	switch {
+	case expected == nil && actual == nil:
+		return true
+	case (expected == nil && actual != nil) || (expected != nil && actual == nil):
+		return false
+	case len(expected) != len(actual):
+		return false
+	}
+
+	for i, v := range expected {
+		if actual[i] != v {
+			return false
+		}
+	}
+
+	return true
 }
