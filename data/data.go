@@ -7,5 +7,5 @@ type Data struct {
 	Category      string
 	StartTime     time.Time
 	EndTime       time.Time
-	SubCategories []string
+	Subcategories []string
 }

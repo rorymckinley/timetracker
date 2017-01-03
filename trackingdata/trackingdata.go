@@ -10,7 +10,7 @@ type Event struct {
 	StartTime     time.Time `yaml: "startTime"`
 	EndTime       time.Time `yaml: "endTime"`
 	Category      string    `yaml: category`
-	SubCategories []string
+	Subcategories []string
 }
 
 type TrackingData struct {
@@ -43,5 +43,5 @@ func (td *TrackingData) AddEvent(data data.Data) {
 }
 
 func startEvent(data data.Data) (event Event) {
-	return Event{Description: data.Description, Category: data.Category, StartTime: data.StartTime, EndTime: data.EndTime, SubCategories: data.SubCategories}
+	return Event{Description: data.Description, Category: data.Category, StartTime: data.StartTime, EndTime: data.EndTime, Subcategories: data.Subcategories}
 }

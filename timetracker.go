@@ -53,7 +53,7 @@ func determineConfig() ActionData {
 		SetCategory(&data)
 		SetStartTime(&data)
 		SetEndTime(&data)
-		SetSubCategories(&data)
+		SetSubcategories(&data)
 		return ActionData{Action: "create-new", Data: data}
 	default:
 		return ActionData{}
@@ -89,8 +89,8 @@ func SetEndTime(data *data.Data) {
 	}
 }
 
-func SetSubCategories(data *data.Data) {
-	data.SubCategories = strings.Split(*Subs, ",")
+func SetSubcategories(data *data.Data) {
+	data.Subcategories = strings.Split(*Subs, ",")
 }
 
 func main() {
