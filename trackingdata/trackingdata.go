@@ -18,7 +18,11 @@ type TrackingData struct {
 }
 
 func (td *TrackingData) LastEvent() *Event {
-	return &td.Events[len(td.Events)-1]
+	if len(td.Events) > 0 {
+		return &td.Events[len(td.Events)-1]
+	} else {
+		return nil
+	}
 }
 
 func (td *TrackingData) LastEventIsOpen() bool {
@@ -26,14 +30,17 @@ func (td *TrackingData) LastEventIsOpen() bool {
 }
 
 func (td *TrackingData) CloseLastEvent() {
-	td.LastEvent().EndTime = time.Now()
+	if last := td.LastEvent(); last != nil {
+		last.EndTime = time.Now()
+	}
 }
 
 func (td *TrackingData) ToggleLast() {
 	if td.LastEventIsOpen() {
 		td.CloseLastEvent()
 	} else {
-		td.AddEvent(data.Data{StartTime: time.Now(), Description: td.LastEvent().Description})
+		td.AddEvent(data.Data{StartTime: time.Now(), Description: td.LastEvent().Description,
+			Category: td.LastEvent().Category, Subcategories: td.LastEvent().Subcategories})
 	}
 }
 
